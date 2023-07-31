@@ -49,3 +49,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+class ContactForm(models.Model):
+    firstName = models.CharField(max_length=255)
+    lastName = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    phoneNumber = models.CharField(max_length=20)
+    message = models.TextField()
+
+    def __str__(self):
+        return self.email
