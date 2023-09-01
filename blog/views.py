@@ -8,22 +8,21 @@ from random import shuffle
 
 # Create your views here.
 class blogView(viewsets.ModelViewSet):
-    queryset = models.Post.objects.filter(isPublished=True).order_by('-created_on')
+    queryset = models.Post.objects.select_related('author').prefetch_related('categories').filter(isPublished=True).order_by('-created_on')
     serializer_class = serializers.BlogPostSerializer
     lookup_field = 'title_slug'
     
 
 class FeaturedBlogsView(views.APIView):
     def get(self, request):
-        queryset = list(models.Post.objects.filter(isPublished=True))
-        shuffle(queryset)
-        serializer = serializers.BlogThumbnailSerializer(queryset[0:3], many=True)
+        queryset = models.Post.objects.select_related('author').prefetch_related('categories').filter(isPublished=True).only('author', 'title', 'title_slug', 'subtitle', 'headerImage_url', 'categories', 'created_on').order_by('?')[0:3]
+        serializer = serializers.BlogThumbnailSerializer(queryset, many=True)
 
         return Response(serializer.data)
     
 class LatestBlogView(views.APIView):
     def get(self, request):
-        queryset = models.Post.objects.filter(isPublished=True).latest('created_on')
+        queryset = models.Post.objects.select_related('author').prefetch_related('categories').filter(isPublished=True).only('author', 'title', 'title_slug', 'subtitle', 'headerImage_url', 'categories', 'created_on').latest('created_on')
         serializer = serializers.BlogThumbnailSerializer(queryset)
 
         return Response(serializer.data)
